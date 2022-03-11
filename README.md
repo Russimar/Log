@@ -1,0 +1,2 @@
+# Log
+Grava arquivo log
