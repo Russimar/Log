@@ -53,7 +53,7 @@ begin
       Exit;
     end;
   end;
-  Caminho := Caminho + '\erro.txt';
+  Caminho := Caminho + '\' + StringReplace(ExtractFileName(Application.ExeName),'.exe', '.txt',[rfReplaceAll]);
   AssignFile(Log, Caminho);
   if not FileExists(Caminho) then
     Rewrite(Log)
