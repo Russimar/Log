@@ -13,10 +13,12 @@ type
 
   TGravarLog = class(TInterfacedObject, IGravarLog)
   private
+    FPath: String;
   public
     class function New: IGravarLog;
     constructor Create;
     destructor Destroy; override;
+    property Path: String read FPath write FPath;
     function doSaveLog(aValue: String): IGravarLog;
   end;
 
@@ -30,7 +32,7 @@ uses
 
 constructor TGravarLog.Create;
 begin
-
+  Path := ExtractFilePath(ParamStr(0));
 end;
 
 destructor TGravarLog.Destroy;
@@ -44,7 +46,7 @@ var
   Caminho: String;
   Log: TextFile;
 begin
-  Caminho := 'c:\temp\LogErro';
+  Caminho := FPath + '\Log';
   if not DirectoryExists(Caminho) then
   begin
     try
