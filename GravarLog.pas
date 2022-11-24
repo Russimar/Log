@@ -25,8 +25,7 @@ type
 implementation
 
 uses
-  System.SysUtils,
-  Vcl.Forms;
+  System.SysUtils;
 
 { TGravarLog }
 
@@ -46,7 +45,7 @@ var
   Caminho: String;
   Log: TextFile;
 begin
-  Caminho := FPath + '\Log';
+  Caminho := FPath + '/Log';
   if not DirectoryExists(Caminho) then
   begin
     try
@@ -55,7 +54,7 @@ begin
       Exit;
     end;
   end;
-  Caminho := Caminho + '\' + StringReplace(ExtractFileName(Application.ExeName),'.exe', '.txt',[rfReplaceAll]);
+  Caminho := Caminho + '/' + StringReplace(ExtractFileName(ParamStr(0)),'.exe', '.txt',[rfReplaceAll]);
   AssignFile(Log, Caminho);
   if not FileExists(Caminho) then
     Rewrite(Log)
@@ -63,6 +62,9 @@ begin
     Append(Log);
   Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
   CloseFile(Log);
+  {$IFDEF CONSOLE}
+    Writeln('Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
+  {$ENDIF}
 end;
 
 class function TGravarLog.New: IGravarLog;
