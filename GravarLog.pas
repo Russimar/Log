@@ -55,6 +55,7 @@ begin
     end;
   end;
   Caminho := Caminho + '/' + StringReplace(ExtractFileName(ParamStr(0)),'.exe', '.txt',[rfReplaceAll]);
+  Caminho := StringReplace(Caminho, '.txt', FormatDateTime('ddmmyyyy', now) + '.txt',[rfReplaceAll]);
   AssignFile(Log, Caminho);
   if not FileExists(Caminho) then
     Rewrite(Log)
