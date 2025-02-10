@@ -61,7 +61,7 @@ begin
     Rewrite(Log)
   else
     Append(Log);
-  Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
+  Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn:ss.zzz', now) + ' ' + aValue);
   CloseFile(Log);
   {$IFDEF CONSOLE}
     Writeln('Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
