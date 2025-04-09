@@ -8,7 +8,8 @@ uses
 type
   IGravarLog = Interface
     ['{4E3DB66D-16FD-45FB-9CC4-1B5A919854A4}']
-    function doSaveLog(aValue: String): IGravarLog;
+    function doSaveLog(aValue: String): IGravarLog; Overload;
+    function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
   End;
 
   TGravarLog = class(TInterfacedObject, IGravarLog)
@@ -19,7 +20,8 @@ type
     constructor Create;
     destructor Destroy; override;
     property Path: String read FPath write FPath;
-    function doSaveLog(aValue: String): IGravarLog;
+    function doSaveLog(aValue: String): IGravarLog; Overload;
+    function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
   end;
 
 implementation
@@ -40,6 +42,34 @@ begin
   inherited;
 end;
 
+function TGravarLog.doSaveLog(aValue, AFileName: String): IGravarLog;
+var
+  Caminho: String;
+  Log: TextFile;
+begin
+  Caminho := FPath + '/Log';
+  if not DirectoryExists(Caminho) then
+  begin
+    try
+      ForceDirectories(Caminho);
+//      CreateDir(Caminho);
+    except
+      Exit;
+    end;
+  end;
+  Caminho := Caminho + '/' + AFileName;
+  AssignFile(Log, Caminho);
+  if not FileExists(Caminho) then
+    Rewrite(Log)
+  else
+    Append(Log);
+  Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
+  CloseFile(Log);
+  {$IFDEF CONSOLE}
+    Writeln('Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn', now) + ' ' + aValue);
+  {$ENDIF}
+end;
+
 function TGravarLog.doSaveLog(aValue: String): IGravarLog;
 var
   Caminho: String;
@@ -49,7 +79,8 @@ begin
   if not DirectoryExists(Caminho) then
   begin
     try
-      CreateDir(Caminho);
+      ForceDirectories(Caminho);
+//      CreateDir(Caminho);
     except
       Exit;
     end;
