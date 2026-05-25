@@ -20,6 +20,7 @@ uses
   , System.Net.Mime
   , System.JSON
   , System.Threading
+  , GravarLog.Auth
   {$ENDIF}
   ;
 
@@ -63,6 +64,7 @@ type
     FPath      : String;
     FServerURL : String;
     {$IFDEF ATIVAR_LOG_NUVEM}
+    FBearerToken: string;
     function MontarJson(
       const ATipo, AMensagem, AOrigem, ASistema,
             AModulo, AUsuario, ADetalhes, AVersao,
@@ -110,6 +112,9 @@ constructor TGravarLog.Create(const AServerURL: string = 'http://localhost:8080'
 begin
   Path       := ExtractFilePath(ParamStr(0));
   FServerURL := AServerURL.TrimRight(['/']);
+  {$IFDEF ATIVAR_LOG_NUVEM}
+  FBearerToken := TGravarLogAuth.GerarBearer;
+  {$ENDIF}
 end;
 
 destructor TGravarLog.Destroy;
@@ -259,6 +264,8 @@ begin
     LClient.ConnectionTimeout := TIMEOUT_MS;
     LClient.ResponseTimeout   := TIMEOUT_MS;
     LHeaders := [TNameValuePair.Create('Content-Type', 'application/json; charset=utf-8')];
+    if not FBearerToken.IsEmpty then
+      LHeaders := LHeaders + [TNameValuePair.Create('Authorization', 'Bearer ' + FBearerToken)];
     LClient.Post(FServerURL + '/log', LContent, nil, LHeaders);
   finally
     LContent.Free;
