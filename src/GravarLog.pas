@@ -1,4 +1,4 @@
-﻿unit GravarLog;
+unit GravarLog;
 
 // ============================================================
 // CONFIGURAÇÃO DE COMPORTAMENTO
@@ -23,25 +23,30 @@ uses
   {$ENDIF}
   ;
 
-const
-  LOG_TRACE       = 'trace';
-  LOG_DEBUG       = 'debug';
-  LOG_INFO        = 'info';
-  LOG_WARNING     = 'warning';
-  LOG_ERROR       = 'error';
-  LOG_CRITICAL    = 'critical';
-  LOG_FATAL       = 'fatal';
-  LOG_SECURITY    = 'security';
-  LOG_AUDIT       = 'audit';
-  LOG_INTEGRATION = 'integration';
-
 type
+  TLogTipo = (
+    ltTrace,
+    ltDebug,
+    ltInfo,
+    ltWarning,
+    ltError,
+    ltCritical,
+    ltFatal,
+    ltSecurity,
+    ltAudit,
+    ltIntegration
+  );
+
+  TLogTipoHelper = record helper for TLogTipo
+    function ToString: string;
+  end;
+
   IGravarLog = Interface
     ['{4E3DB66D-16FD-45FB-9CC4-1B5A919854A4}']
     function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
     function doSaveLog(
       const AMensagem        : string;
-      const ATipo            : string = LOG_ERROR;
+      const ATipo            : TLogTipo = ltError;
       const AOrigem          : string = '';
       const ASistema         : string = '';
       const AModulo          : string = '';
@@ -73,7 +78,7 @@ type
     function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
     function doSaveLog(
       const AMensagem        : string;
-      const ATipo            : string = LOG_ERROR;
+      const ATipo            : TLogTipo = ltError;
       const AOrigem          : string = '';
       const ASistema         : string = '';
       const AModulo          : string = '';
@@ -86,6 +91,18 @@ type
   end;
 
 implementation
+
+{ TLogTipoHelper }
+
+function TLogTipoHelper.ToString: string;
+const
+  MAP: array[TLogTipo] of string = (
+    'trace', 'debug', 'info', 'warning', 'error',
+    'critical', 'fatal', 'security', 'audit', 'integration'
+  );
+begin
+  Result := MAP[Self];
+end;
 
 { TGravarLog }
 
@@ -135,7 +152,7 @@ end;
 
 function TGravarLog.doSaveLog(
   const AMensagem        : string;
-  const ATipo            : string = LOG_ERROR;
+  const ATipo            : TLogTipo = ltError;
   const AOrigem          : string = '';
   const ASistema         : string = '';
   const AModulo          : string = '';
@@ -171,10 +188,10 @@ begin
     Rewrite(Log)
   else
     Append(Log);
-  Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn:ss.zzz', now) + ' [' + ATipo + '] ' + AMensagem);
+  Writeln(Log, 'Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn:ss.zzz', now) + ' [' + ATipo.ToString + '] ' + AMensagem);
   CloseFile(Log);
   {$IFDEF CONSOLE}
-    Writeln('Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn:ss.zzz', now) + ' [' + ATipo + '] ' + AMensagem);
+    Writeln('Mensagem: ' + FormatDateTime('dd/mm/yyyy hh:nn:ss.zzz', now) + ' [' + ATipo.ToString + '] ' + AMensagem);
   {$ENDIF}
   {$ENDIF}
 
@@ -182,7 +199,7 @@ begin
   if not FServerURL.IsEmpty then
   begin
     LJson := MontarJson(
-      ATipo, AMensagem, AOrigem, ASistema,
+      ATipo.ToString, AMensagem, AOrigem, ASistema,
       AModulo, AUsuario, ADetalhes, AVersao,
       ATags, ADadosAdicionais
     );
