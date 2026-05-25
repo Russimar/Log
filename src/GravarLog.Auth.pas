@@ -24,6 +24,7 @@ uses
   , Androidapi.JNI.App
   , Androidapi.Helpers
   , Androidapi.JNI.JavaTypes
+  , Androidapi.JNI.GraphicsContentViewText
   {$ENDIF}
   ;
 
@@ -68,6 +69,8 @@ end;
 
 class function TGravarLogAuth.LerMetaData(const ACampo: string): string;
 {$IFDEF ANDROID}
+const
+  GET_META_DATA = 128;
 var
   LAppInfo: JApplicationInfo;
 begin
@@ -75,7 +78,7 @@ begin
   try
     LAppInfo := TAndroidHelper.Context.getPackageManager.getApplicationInfo(
       TAndroidHelper.Context.getPackageName,
-      JPackageManager.JavaClass.GET_META_DATA);
+      GET_META_DATA);
     if LAppInfo.metaData <> nil then
       Result := JStringToString(LAppInfo.metaData.getString(StringToJString(ACampo)));
   except

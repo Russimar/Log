@@ -94,6 +94,9 @@ type
 
 implementation
 
+uses
+  System.Net.URLClient;	
+
 { TLogTipoHelper }
 
 function TLogTipoHelper.ToString: string;
