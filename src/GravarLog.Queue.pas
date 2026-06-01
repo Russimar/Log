@@ -6,7 +6,8 @@ uses
   System.SyncObjs,
   System.Generics.Collections,
   GravarLog,
-  GravarLog.Utils;
+  GravarLog.Utils,
+  System.Classes;
 
 type
   TLogItem = record
