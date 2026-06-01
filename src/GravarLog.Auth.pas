@@ -18,7 +18,7 @@ implementation
 uses
   System.Hash
   {$IFDEF MSWINDOWS}
-  , Winapi.Windows
+  , Winapi.Windows, System.SysUtils
   {$ENDIF}
   {$IFDEF ANDROID}
   , Androidapi.JNI.App

@@ -22,26 +22,9 @@ uses
   , System.Threading
   , GravarLog.Auth
   {$ENDIF}
-  ;
+  , GravarLog.Utils;
 
 type
-  TLogTipo = (
-    ltTrace,
-    ltDebug,
-    ltInfo,
-    ltWarning,
-    ltError,
-    ltCritical,
-    ltFatal,
-    ltSecurity,
-    ltAudit,
-    ltIntegration
-  );
-
-  TLogTipoHelper = record helper for TLogTipo
-    function ToString: string;
-  end;
-
   IGravarLog = Interface
     ['{4E3DB66D-16FD-45FB-9CC4-1B5A919854A4}']
     function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
@@ -96,18 +79,6 @@ implementation
 
 uses
   System.Net.URLClient;	
-
-{ TLogTipoHelper }
-
-function TLogTipoHelper.ToString: string;
-const
-  MAP: array[TLogTipo] of string = (
-    'trace', 'debug', 'info', 'warning', 'error',
-    'critical', 'fatal', 'security', 'audit', 'integration'
-  );
-begin
-  Result := MAP[Self];
-end;
 
 { TGravarLog }
 
