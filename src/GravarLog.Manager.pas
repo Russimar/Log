@@ -4,6 +4,7 @@ interface
 
 uses
   GravarLog,
+  GravarLog.Queue,
   GravarLog.Utils;
 
 type
@@ -11,10 +12,12 @@ type
   private
     FNivelMinimo        : TNivelLog;
     FLog                : IGravarLog;
+    FQueue              : TGravarLogQueue;
     constructor Create;
     class var FInstance : TGravarLogManager;
   public
     class function GetInstance: TGravarLogManager;
+    destructor Destroy; override;
     function ConfigurarNivel(ANivel: TNivelLog): TGravarLogManager;
     function ConfigurarServidor(const AURL: string): TGravarLogManager;
     function doSaveLog(
@@ -42,6 +45,13 @@ constructor TGravarLogManager.Create;
 begin
   FNivelMinimo := nlNormal;
   FLog         := TGravarLog.New;
+  FQueue       := TGravarLogQueue.Create(FLog);
+end;
+
+destructor TGravarLogManager.Destroy;
+begin
+  FQueue.Free;
+  inherited;
 end;
 
 class function TGravarLogManager.GetInstance: TGravarLogManager;
@@ -59,8 +69,9 @@ end;
 
 function TGravarLogManager.ConfigurarServidor(const AURL: string): TGravarLogManager;
 begin
-  FLog   := TGravarLog.New(AURL);
   Result := Self;
+  FLog   := TGravarLog.New(AURL);
+  FQueue.ReplaceLog(FLog);
 end;
 
 function TGravarLogManager.doSaveLog(
@@ -80,10 +91,12 @@ begin
   Result := Self;
   if Ord(ANivel) > Ord(FNivelMinimo) then
     Exit;
-  FLog.doSaveLog(
-    AMensagem, ATipo, AOrigem, ASistema,
-    AModulo, AUsuario, ADetalhes, AVersao,
-    ATags, ADadosAdicionais
+  FQueue.Enqueue(
+    TLogItem.Create(
+      AMensagem, ATipo, AOrigem, ASistema,
+      AModulo, AUsuario, ADetalhes, AVersao,
+      ATags, ADadosAdicionais
+    )
   );
 end;
 
