@@ -1,4 +1,4 @@
-unit GravarLog;
+﻿unit GravarLog;
 
 // ============================================================
 // CONFIGURAÇÃO DE COMPORTAMENTO
@@ -30,7 +30,7 @@ type
     function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
     function doSaveLog(
       const AMensagem        : string;
-      const ATipo            : TLogTipo = ltError;
+      const ATipo            : TLogTipo = ltInfo;
       const AOrigem          : string = '';
       const ASistema         : string = '';
       const AModulo          : string = '';
@@ -63,7 +63,7 @@ type
     function doSaveLog(aValue, AFileName: String): IGravarLog; Overload;
     function doSaveLog(
       const AMensagem        : string;
-      const ATipo            : TLogTipo = ltError;
+      const ATipo            : TLogTipo = ltInfo;
       const AOrigem          : string = '';
       const ASistema         : string = '';
       const AModulo          : string = '';
@@ -131,7 +131,7 @@ end;
 
 function TGravarLog.doSaveLog(
   const AMensagem        : string;
-  const ATipo            : TLogTipo = ltError;
+  const ATipo            : TLogTipo = ltInfo;
   const AOrigem          : string = '';
   const ASistema         : string = '';
   const AModulo          : string = '';
