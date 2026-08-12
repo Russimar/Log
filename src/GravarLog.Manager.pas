@@ -39,6 +39,12 @@ type
 
 implementation
 
+uses
+  System.SyncObjs;
+
+var
+  GLock : TCriticalSection;
+
 { TGravarLogManager }
 
 constructor TGravarLogManager.Create;
@@ -56,22 +62,45 @@ end;
 
 class function TGravarLogManager.GetInstance: TGravarLogManager;
 begin
+  // Double-checked locking: o teste externo evita o custo do lock no caminho
+  // comum (instancia ja criada); o teste interno garante criacao unica quando
+  // duas ou mais threads chegam juntas na primeira chamada.
   if not Assigned(FInstance) then
-    FInstance := TGravarLogManager.Create;
+  begin
+    GLock.Enter;
+    try
+      if not Assigned(FInstance) then
+        FInstance := TGravarLogManager.Create;
+    finally
+      GLock.Leave;
+    end;
+  end;
   Result := FInstance;
 end;
 
 function TGravarLogManager.ConfigurarNivel(ANivel: TNivelLog): TGravarLogManager;
 begin
-  FNivelMinimo := ANivel;
-  Result       := Self;
+  Result := Self;
+  GLock.Enter;
+  try
+    FNivelMinimo := ANivel;
+  finally
+    GLock.Leave;
+  end;
 end;
 
 function TGravarLogManager.ConfigurarServidor(const AURL: string): TGravarLogManager;
 begin
   Result := Self;
-  FLog   := TGravarLog.New(AURL);
-  FQueue.ReplaceLog(FLog);
+  // FLog e uma interface lida por doSaveLog a partir de outras threads; a
+  // troca precisa ser atomica em relacao a esses leitores.
+  GLock.Enter;
+  try
+    FLog := TGravarLog.New(AURL);
+    FQueue.ReplaceLog(FLog);
+  finally
+    GLock.Leave;
+  end;
 end;
 
 function TGravarLogManager.doSaveLog(
@@ -87,9 +116,17 @@ function TGravarLogManager.doSaveLog(
   const ATags            : string = '';
   const ADadosAdicionais : string = ''
 ): TGravarLogManager;
+var
+  LNivelMinimo : TNivelLog;
 begin
   Result := Self;
-  if Ord(ANivel) > Ord(FNivelMinimo) then
+  GLock.Enter;
+  try
+    LNivelMinimo := FNivelMinimo;
+  finally
+    GLock.Leave;
+  end;
+  if Ord(ANivel) > Ord(LNivelMinimo) then
     Exit;
   FQueue.Enqueue(
     TLogItem.Create(
@@ -101,10 +138,12 @@ begin
 end;
 
 initialization
+  GLock := TCriticalSection.Create;
   TGravarLogManager.FInstance := nil;
 
 finalization
   TGravarLogManager.FInstance.Free;
   TGravarLogManager.FInstance := nil;
+  GLock.Free;
 
 end.
